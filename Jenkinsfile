@@ -27,29 +27,26 @@ node('') {
                 }
 
                 stage('Build') {
-                    environment {
-                        // Define the Node.js version to use
-                        NODE_VERSION = '16' // Adjust this to your desired Node.js version
-                        NVM_DIR = '/var/lib/jenkins/.nvm'
-                    }
-                    steps {
-                        // Install dependencies and build
-                        sh '''
-                            #!/bin/bash
-                            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-                            export NVM_DIR="$HOME/.nvm"
-                            if [ -s "$NVM_DIR/nvm.sh" ]; then
-                                . "$NVM_DIR/nvm.sh"
-                            fi
-                            if [ -s "$NVM_DIR/bash_completion" ]; then
-                                . "$NVM_DIR/bash_completion"
-                            fi
-                            nvm install $NODE_VERSION
-                            nvm use $NODE_VERSION
-                            yarn install
-                            yarn build
-                        '''
-                    }
+                    // Define the Node.js version to use
+                    def NODE_VERSION = '16' // Adjust this to your desired Node.js version
+                    def NVM_DIR = '/var/lib/jenkins/.nvm'
+
+                    // Install dependencies and build
+                    sh """
+                        #!/bin/bash
+                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+                        export NVM_DIR="$HOME/.nvm"
+                        if [ -s "$NVM_DIR/nvm.sh" ]; then
+                            . "$NVM_DIR/nvm.sh"
+                        fi
+                        if [ -s "$NVM_DIR/bash_completion" ]; then
+                            . "$NVM_DIR/bash_completion"
+                        fi
+                        nvm install $NODE_VERSION
+                        nvm use $NODE_VERSION
+                        yarn install
+                        yarn build
+                    """
                 }
 
                 stage('Copy Artifacts from elite-ui Repo to angular Repo') {
@@ -63,7 +60,7 @@ node('') {
                 }
 
                 stage('Archive Artifacts') {
-                    archiveArtifacts "metadata.json"
+                    archiveArtifacts artifacts: "metadata.json"
                     if (params.buildCdnAssests == 'true') {
                         sh """
                         rm -rf cdn_assets
@@ -71,7 +68,7 @@ node('') {
                         cp -r src/app/dist-cdn/* cdn_assets/
                         zip -Jr cdn_assets.zip cdn_assets
                         """
-                        archiveArtifacts "src/app/dist-cdn/index_cdn.ejs, cdn_assets.zip"
+                        archiveArtifacts artifacts: "src/app/dist-cdn/index_cdn.ejs, cdn_assets.zip"
                     }
                     currentBuild.description = "${build_tag}"
                 }
