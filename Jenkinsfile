@@ -28,6 +28,7 @@ node('') {
 
                 stage('Build Second Repo') {
                     dir('second-repo') {
+                        sh "chmod +x ./scripts/pack-prod-build.sh"
                         sh "bash ./scripts/pack-prod-build.sh"
                     }
                 }
