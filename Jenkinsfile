@@ -22,6 +22,10 @@ node('') {
                     echo "build_tag: " + build_tag
                 }
 
+                stage('Build angular Repo') {
+                    sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
+                }              
+
                 stage('Checkout elite-ui Repo') {
                     git branch: 'main', url: 'https://github.com/NIUANULP/nulp-elite-ui', changelog: false, poll: false
                 }
@@ -49,11 +53,6 @@ node('') {
                     """
                 }
 
-
-
-                stage('Build angular Repo') {
-                    sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
-                }
 
                 stage('Archive Artifacts') {
                     archiveArtifacts artifacts: "metadata.json"
