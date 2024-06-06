@@ -26,33 +26,6 @@ node('') {
                     sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
                 }              
 
-                stage('Checkout elite-ui Repo') {
-                    git branch: 'main', url: 'https://github.com/NIUANULP/nulp-elite-ui', changelog: false, poll: false
-                }
-
-                stage('Build') {
-                    // Define the Node.js version to use
-                    def NODE_VERSION = '16' // Adjust this to your desired Node.js version
-                    def NVM_DIR = '/var/lib/jenkins/.nvm'
-
-                    // Install dependencies and build
-                    sh """
-                        #!/bin/bash
-                        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-                        export NVM_DIR="$HOME/.nvm"
-                        if [ -s "$NVM_DIR/nvm.sh" ]; then
-                            . "$NVM_DIR/nvm.sh"
-                        fi
-                        if [ -s "$NVM_DIR/bash_completion" ]; then
-                            . "$NVM_DIR/bash_completion"
-                        fi
-                        nvm install $NODE_VERSION
-                        nvm use $NODE_VERSION
-                        yarn install
-                        yarn build
-                    """
-                }
-
 
                 stage('Archive Artifacts') {
                     archiveArtifacts artifacts: "metadata.json"
