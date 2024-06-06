@@ -23,7 +23,7 @@ node('') {
                 }
 
                 stage('Checkout elite-ui Repo') {
-                    git branch: 'main', url: 'https://github.com/NIUANULP/nulp-elite-ui', changelog: false, poll: false
+                    git branch: 'main', url: 'https://github.com/vky25/nulp-elite-ui.git', changelog: false, poll: false
                 }
 
                 stage('Build') {
