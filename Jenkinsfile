@@ -55,6 +55,10 @@ node('') {
                     """
                 }
 
+                stage('Checkout elite-ui Repo') {
+                    git branch: 'release-4.10.0_RC12-elite-ui', url: 'https://github.com/vky25/nulp-portal.git', changelog: false, poll: false
+                }              
+
                 stage('Build angular Repo') {
                     sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
                 }
