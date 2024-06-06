@@ -49,11 +49,7 @@ node('') {
                     """
                 }
 
-                stage('Copy Artifacts from elite-ui Repo to angular Repo') {
-                    sh """
-                    cp -r /var/lib/jenkins/workspace/Build/Core/Player/prod-build/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
-                    """
-                }
+
 
                 stage('Build angular Repo') {
                     sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
@@ -72,6 +68,12 @@ node('') {
                     }
                     currentBuild.description = "${build_tag}"
                 }
+
+                stage('Copy Artifacts from elite-ui Repo to angular Repo') {
+                    sh """
+                    cp -r /var/lib/jenkins/workspace/Build/Core/Player/prod-build/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
+                    """
+                }              
 
                 if (params.buildDockerImage == 'true') {
                     stage('Docker Build') {
