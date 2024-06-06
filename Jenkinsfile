@@ -10,7 +10,7 @@ node('') {
             timestamps {
                 stage('Checkout First Repo') {
                     if (!env.hub_org) {
-                        println(ANSI_BOLD + ANSI_RED + "Uh Oh! Please set a Jenkins environment variable named hub_org with value as registery/sunbidrded" + ANSI_NORMAL)
+                        println(ANSI_BOLD + ANSI_RED + "Uh Oh! Please set a Jenkins environment variable named hub_org with value as registry/sunbird" + ANSI_NORMAL)
                         error 'Please resolve the errors and rerun..'
                     } else {
                         println(ANSI_BOLD + ANSI_GREEN + "Found environment variable named hub_org with value as: " + hub_org + ANSI_NORMAL)
@@ -22,15 +22,11 @@ node('') {
                     echo "build_tag: " + build_tag
                 }
 
-               // stage('Checkout nulp-portal Repo') {
-               //     git branch: 'release-4.10.0_RC12-elite-ui', url: 'https://github.com/vky25/nulp-portal.git', changelog: false, poll: false
-               // }              
-
                 stage('Checkout elite-ui Repo') {
-                    git branch: 'main', url: 'https://github.com/vky25/nulp-elite-ui.git', changelog: false, poll: false
+                    git branch: 'main', url: 'https://github.com/NIUANULP/nulp-elite-ui', changelog: false, poll: false
                 }
 
-                stage('elite-ui Build') {
+                stage('Build') {
                     // Define the Node.js version to use
                     def NODE_VERSION = '16' // Adjust this to your desired Node.js version
                     def NVM_DIR = '/var/lib/jenkins/.nvm'
@@ -53,15 +49,11 @@ node('') {
                     """
                 }
 
-               // stage('Copy Artifacts from elite-ui Repo to angular Repo') {
-               //     sh """
-               //     cp -r /var/lib/jenkins/workspace/Build/Core/Player/prod-build/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
-               //     """
-               // }
-
-                stage('Checkout elite-ui Repo') {
-                    git branch: 'release-4.10.0_RC12-elite-ui', url: 'https://github.com/vky25/nulp-portal.git', changelog: false, poll: false
-                }              
+                stage('Copy Artifacts from elite-ui Repo to angular Repo') {
+                    sh """
+                    cp -r nulp-elite-ui/prod-build/webapp/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
+                    """
+                }
 
                 stage('Build angular Repo') {
                     sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
@@ -79,6 +71,12 @@ node('') {
                         archiveArtifacts artifacts: "src/app/dist-cdn/index_cdn.ejs, cdn_assets.zip"
                     }
                     currentBuild.description = "${build_tag}"
+                }
+
+                if (params.buildDockerImage == 'true') {
+                    stage('Docker Build') {
+                        sh("bash ./docker_build.sh ${build_tag} ${env.NODE_NAME} ${hub_org}")
+                    }
                 }
             }
         }
