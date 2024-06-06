@@ -22,7 +22,7 @@ node('') {
                     echo "build_tag: " + build_tag
                 }
 
-                stage('Checkout elite-ui Repo') {
+                stage('Checkout nulp-portal Repo') {
                     git branch: 'release-4.10.0_RC12-elite-ui', url: 'https://github.com/vky25/nulp-portal.git', changelog: false, poll: false
                 }              
 
@@ -30,7 +30,7 @@ node('') {
                     git branch: 'main', url: 'https://github.com/vky25/nulp-elite-ui.git', changelog: false, poll: false
                 }
 
-                stage('Build') {
+                stage('elite-ui Build') {
                     // Define the Node.js version to use
                     def NODE_VERSION = '16' // Adjust this to your desired Node.js version
                     def NVM_DIR = '/var/lib/jenkins/.nvm'
@@ -53,15 +53,15 @@ node('') {
                     """
                 }
 
-                stage('Copy Artifacts from elite-ui Repo to angular Repo') {
-                    sh """
-                    cp -r /var/lib/jenkins/workspace/Build/Core/Player/prod-build/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
-                    """
-                }
+               // stage('Copy Artifacts from elite-ui Repo to angular Repo') {
+               //     sh """
+               //     cp -r /var/lib/jenkins/workspace/Build/Core/Player/prod-build/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
+               //     """
+               // }
 
-                stage('Checkout elite-ui Repo') {
-                    git branch: 'release-4.10.0_RC12-elite-ui', url: 'https://github.com/vky25/nulp-portal.git', changelog: false, poll: false
-                }              
+               // stage('Checkout elite-ui Repo') {
+               //     git branch: 'release-4.10.0_RC12-elite-ui', url: 'https://github.com/vky25/nulp-portal.git', changelog: false, poll: false
+               // }              
 
                 stage('Build angular Repo') {
                     sh("bash ./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org} ${params.buildDockerImage} ${params.buildCdnAssests} ${params.cdnUrl}")
