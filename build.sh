@@ -22,8 +22,6 @@ fi
 
 commit_hash=$(git rev-parse --short HEAD)
 nvm install $NODE_VERSION # same is used in client and server
-# nvm install 14.19.0
-# nvm install 16.0.0
 cd src/app
 mkdir -p app_dist/ # this folder should be created prior server and client build
 rm -rf dist-cdn # remove cdn dist folder
@@ -37,8 +35,6 @@ build_client_docker(){
     mv app_dist/dist/index.html app_dist/dist/index.ejs # rename index file
 }
 
-#cp -r /var/lib/jenkins/elite-ui/nulp-elite-ui/prod-build/webapp /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/webapp
-
 # function to run client build for cdn
 build_client_cdn(){
     echo "starting client cdn prod build"
@@ -47,6 +43,7 @@ build_client_cdn(){
     npm run inject-cdn-fallback
     echo "completed client cdn prod build"
 }
+
 # function to run client build
 build_client(){
     echo "Building client in background"
@@ -65,23 +62,20 @@ build_client(){
         echo "22222222222222222222"
         build_client_cdn & # run client local build in background
     fi
-        echo "33333333333333333333333"
+    echo "33333333333333333333333"
     wait # wait for both build to complete
     echo "completed client post_build"
 }
-
-
 
 # function to run server build
 build_server(){
     echo "Building server in background"
     echo "copying required files to app_dist"
-    cp -R libs helpers proxy resourcebundles package.json framework.config.js sunbird-plugins routes constants controllers server.js webapp ./../../Dockerfile app_dist
+    cp -R libs helpers proxy resourcebundles package.json framework.config.js sunbird-plugins routes constants controllers server.js ./../../Dockerfile app_dist
     
     # Copy additional files to dist folder
-    #echo "copying additional files to dist"
+    echo "copying additional files to dist"
     cp -r /var/lib/jenkins/workspace/Build/Core/Player/prod-build/* /var/lib/jenkins/workspace/Build/Core/Player/src/app/app_dist/dist/
-    
     
     cd app_dist
     nvm use $NODE_VERSION
@@ -97,22 +91,8 @@ then
    build_server & # run client build in background
 fi
 
-## wait for both build to complete
+# wait for both build to complete
 wait 
 
 BUILD_ENDTIME=$(date +%s)
-echo "Client and Server Build complete Took $[$BUILD_ENDTIME - $STARTTIME] seconds to complete."
-
-if [ $buildDockerImage == true ]
-then
-    cd app_dist
-    sed -i "/version/a\  \"buildHash\": \"${commit_hash}\"," package.json
-    echo "starting docker build"
-    docker build --no-cache --label commitHash=$(git rev-parse --short HEAD) -t ${org}/${name}:${build_tag} .
-    echo "completed docker build"
-    cd ../../..
-    echo {\"image_name\" : \"${name}\", \"image_tag\" : \"${build_tag}\",\"commit_hash\" : \"${commit_hash}\", \"node_name\" : \"$node\"} > metadata.json
-fi
-
-ENDTIME=$(date +%s)
-echo "build completed. Took $[$ENDTIME - $STARTTIME] seconds."
+echo "Client and Server Build complete. Took $((BUILD_ENDTIME - STARTTIME)) seconds to complete."
